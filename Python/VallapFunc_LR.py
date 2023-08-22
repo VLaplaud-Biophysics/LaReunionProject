@@ -168,7 +168,8 @@ def dist(x1,y1,x2,y2):
 
 # 5. simple ismember function, checks if A is within B
 def ismember(A, B):
-    return [ np.sum(b == A) for b in B ]
+    bool_list = list(map(bool,[ np.sum(b == A) for b in B ]))
+    return bool_list
 
 # 6. R2 computation for a fit
 def computeR2(Ydata,Yfit):

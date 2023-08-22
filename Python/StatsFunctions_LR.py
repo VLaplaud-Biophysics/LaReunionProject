@@ -87,10 +87,7 @@ def Corr(GDs,labels, **kwargs):
         
     for GD,lab,colo in zip(GDs,labels,colors) :
         
-        if lab[0:6] == 'Pooled':
-            GDtoCorr = GD.loc[GD['Img'] == 0, [*dfcols,'Expe']]
-        else:
-            GDtoCorr = GD.loc[GD['Img'] == 0, dfcols]
+        GDtoCorr = GD[dfcols]
         corrMat = GDtoCorr.corr(method=corrmethod)
         
         if corrmethod == 'spearman' :
@@ -102,13 +99,13 @@ def Corr(GDs,labels, **kwargs):
         plt.title(corrmethod + ' correlation for \n' + lab)
         mask = np.zeros_like(corrMat)
         mask[np.tril_indices_from(mask,k=-1)] = True
-        sns.heatmap(corrMat,mask = mask,square=True,vmin=-1,vmax=1,annot=True,fmt=".3f",annot_kws={"size":8}) #,cmap = 'YlGnBu'
+        sns.heatmap(corrMat,mask = mask,square=True,vmin=-1,vmax=1,annot=True,fmt=".3f",annot_kws={"size":8},cmap = 'RdBu')
         
         plt.figure(dpi=250,facecolor = 'white')
         plt.title(corrmethod + ' p-value for \n' + lab)
         mask = np.zeros_like(corrMat)
         mask[np.tril_indices_from(mask,k=-1)] = True
-        sns.heatmap(pvalMat,mask = mask,square=True,vmin=0,vmax=1,annot=True,fmt=".3f",annot_kws={"size":8},cmap = 'YlGnBu')
+        sns.heatmap(pvalMat,mask = mask,square=True,vmin=0,vmax=1,annot=True,fmt=".3f",annot_kws={"size":8},cmap = 'autumn')
         
         if PlotFits:
             
