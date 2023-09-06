@@ -67,6 +67,15 @@ def Corr(GDs,labels, **kwargs):
     colslab = dfcols
     colors = mtl.repmat([0.8, 0, 0.7],len(GDs),1)
     PlotFits = False
+    DataFilter = 'off'
+    siglvl = 0.05
+    CClvl = 0.3
+    fsize = 5
+    labelscale = 1
+    annotsize = 8
+    dpival = 200
+    PlotCorr = True
+    PlotP = True
 
     
     for key, value in kwargs.items(): 
@@ -79,8 +88,26 @@ def Corr(GDs,labels, **kwargs):
             colslab = value
         elif key == 'colors':
             colors = value
+        elif key == 'DataFilter':
+            DataFilter = value
+        elif key == 'SigLvl':
+            siglvl = value
+        elif key == 'CCLvl':
+            CClvl = value
+        elif key == 'fsize':
+            fsize = value
+        elif key == 'labelscale':
+            labelscale = value
+        elif key == 'annotsize':
+            annotsize = value
+        elif key == 'dpival':
+            dpival = value
         elif key == 'PlotFits':
             PlotFits = value
+        elif key == 'PlotCorr':
+            PlotCorr = value
+        elif key == 'PlotP':
+            PlotP = value
         else:
             print('Unknown key : ' + key + '. Kwarg ignored.')
 
@@ -95,17 +122,30 @@ def Corr(GDs,labels, **kwargs):
         else:
             pvalMat = GDtoCorr.corr(method=lambda x, y: pearsonr(x, y)[1])
         
-        plt.figure(dpi=250,facecolor = 'white')
-        plt.title(corrmethod + ' correlation for \n' + lab)
-        mask = np.zeros_like(corrMat)
-        mask[np.tril_indices_from(mask,k=-1)] = True
-        sns.heatmap(corrMat,mask = mask,square=True,vmin=-1,vmax=1,annot=True,fmt=".3f",annot_kws={"size":8},cmap = 'RdBu')
         
-        plt.figure(dpi=250,facecolor = 'white')
-        plt.title(corrmethod + ' p-value for \n' + lab)
         mask = np.zeros_like(corrMat)
         mask[np.tril_indices_from(mask,k=-1)] = True
-        sns.heatmap(pvalMat,mask = mask,square=True,vmin=0,vmax=1,annot=True,fmt=".3f",annot_kws={"size":8},cmap = 'autumn')
+        
+        if DataFilter == 'on':
+                mask[pvalMat>=siglvl] = True
+                mask[np.abs(corrMat)<=CClvl] = True
+            
+        sns.set(font_scale=labelscale) 
+        
+        if PlotCorr:
+                        
+            fig1 = plt.figure(figsize=(fsize,fsize),dpi=dpival,facecolor = 'white')
+            plt.title(corrmethod + ' correlation for \n' + lab)        
+            sns.heatmap(corrMat,mask = mask,square=True,xticklabels = colslab,yticklabels = colslab,vmin=-1,vmax=1,annot=True,
+                              fmt=".2f",annot_kws={"size":annotsize},cmap = 'RdBu')
+            
+        
+        if PlotP :
+            fig2 = plt.figure(figsize=(fsize,fsize),dpi=dpival,facecolor = 'white')
+            plt.title(corrmethod + ' p-value for \n' + lab)
+            sns.heatmap(pvalMat,mask = mask,square=True,xticklabels = colslab,yticklabels = colslab,vmin=0,vmax=1,annot=True,
+                              fmt=".2f",annot_kws={"size":annotsize},cmap = 'autumn')
+            
         
         if PlotFits:
             

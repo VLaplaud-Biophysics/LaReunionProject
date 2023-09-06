@@ -18,7 +18,7 @@ import os
 import VallapFunc_LR as vf
 
 
-
+from scipy.interpolate import LinearNDInterpolator as Linterp, NearestNDInterpolator as Ninterp
 
 
 from IPython import get_ipython
@@ -49,4 +49,38 @@ def MonthAvg(dfs,AllVars,monthlist):
 
     return dffinal
 
+
+
+def WeatherInterp(DF_plants,DF_weather,columns,**kwargs):
     
+    interpmethod = 'linear'
+    
+    for key, value in kwargs.items(): 
+        if key == 'interpmethod':
+            interpmethod = value 
+    
+    if interpmethod == 'linear':
+        Interp = Linterp
+    elif interpmethod == 'nearest':
+        Interp = Ninterp
+    else:
+        print('Wrong method : ' + interpmethod + '. Option are ''nearest'' or ''linear''. Using ''nearest''.')
+        Interp = Ninterp
+
+    xref = DF_weather['Latitude (km)'].values
+    yref = DF_weather['Longitude (km)'].values
+    zref = DF_weather['Altitude (km)'].values
+        
+    xq = DF_plants['Latitude (km)'].values
+    yq = DF_plants['Longitude (km)'].values
+    zq = DF_plants['Altitude (km)'].values
+        
+    for column in columns:
+        
+        values = DF_weather[column].values
+
+        interp_weather = Interp(list(zip(xref,yref,zref)),values)  
+
+        DF_plants[column] = interp_weather(xq,yq,zq)
+    
+    return DF_plants 
